@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pwny-ninja
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pwny-ninja
+  template:
+    metadata:
+      labels:
+        app: pwny-ninja
+    spec:
+      containers:
+        - name: pwny-ninja
+          image: <REGISTRY>/pwny-ninja:latest
+          env:
+            - name: GIT_SHA
+              value: 'unknown'
+          ports:
+            - containerPort: 8080
