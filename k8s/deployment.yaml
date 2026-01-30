@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pwny-ninja
+  labels:
+    app: pwny-ninja
 spec:
   replicas: 1
   selector:
@@ -14,9 +16,9 @@ spec:
     spec:
       containers:
         - name: pwny-ninja
-          image: <REGISTRY>/pwny-ninja:latest
+          image: mikion279/pwny-ninja:localtest
           env:
             - name: GIT_SHA
-              value: 'unknown'
+              value: 'localtest'
           ports:
             - containerPort: 8080
