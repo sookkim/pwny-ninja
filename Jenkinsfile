@@ -34,6 +34,27 @@ pipeline {
       }
     }
 
+<<<<<<< HEAD
+stage('EKS Auth (kubeconfig)') {
+  steps {
+    withCredentials([usernamePassword(
+      credentialsId: 'aws-keys',
+      usernameVariable: 'AWS_ACCESS_KEY_ID',
+      passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+    )]) {
+      sh '''
+        set -eux
+        export AWS_DEFAULT_REGION=ap-northeast-2
+
+        aws sts get-caller-identity
+        aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
+        kubectl --kubeconfig "$WORKSPACE/kubeconfig" get nodes
+      '''
+    }
+  }
+}
+}
+=======
     stage('EKS Auth (kubeconfig)') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'sookyung-aws', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
@@ -48,6 +69,7 @@ pipeline {
         }
       }
     }
+>>>>>>> parent of ca6b919 (Update Jenkinsfile)
 
     stage('Debug kubectl context') {
   steps {
