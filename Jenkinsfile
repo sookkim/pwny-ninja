@@ -34,6 +34,17 @@ pipeline {
       }
     }
 
+    stage('EKS Auth (kubeconfig)') {
+  steps {
+    sh '''
+      set -eux
+      aws --version
+      aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
+      kubectl --kubeconfig "$WORKSPACE/kubeconfig" get nodes
+    '''
+  }
+}
+
     stage('Debug kubectl context') {
   steps {
     sh '''
@@ -51,7 +62,7 @@ pipeline {
     stage('Deploy (kubectl apply)') {
       steps {
         sh """
-          kubectl create namespace ${K8S_NAMESPACE} || true
+          kubectl create namespace ${K8S_NAMESPACE} || true --kubeconfig "$WORKSPACE/kubeconfig"
 
           mkdir -p /tmp/pwny-ninja
           cp -r k8s/* /tmp/pwny-ninja/
@@ -59,8 +70,8 @@ pipeline {
           sed -i.bak "s|DOCKERHUB_USER/pwny-ninja:REPLACE_TAG|${IMAGE_NAME}:${GIT_SHA}|g" /tmp/pwny-ninja/deployment.yaml
           sed -i.bak "s|value: \\"REPLACE_SHA\\"|value: \\"${GIT_SHA}\\"|g" /tmp/pwny-ninja/deployment.yaml
 
-          kubectl -n ${K8S_NAMESPACE} apply -f /tmp/pwny-ninja/
-          kubectl -n ${K8S_NAMESPACE} rollout status deploy/pwny-ninja
+          kubectl -n ${K8S_NAMESPACE} apply -f /tmp/pwny-ninja/ --kubeconfig "$WORKSPACE/kubeconfig"
+          kubectl -n ${K8S_NAMESPACE} rollout status deploy/pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
         """
       }
     }
