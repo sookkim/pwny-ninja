@@ -36,12 +36,19 @@ pipeline {
 
     stage('EKS Auth (kubeconfig)') {
   steps {
-    sh '''
-      set -eux
-      aws --version
-      aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
-      kubectl --kubeconfig "$WORKSPACE/kubeconfig" get nodes
-    '''
+    withAWS(credentials: 'sookyung-aws', region: 'ap-northeast-2') {
+      sh '''
+        set -eux
+        aws sts get-caller-identity
+
+        aws eks update-kubeconfig \
+          --region ap-northeast-2 \
+          --name pwny-ninja \
+          --kubeconfig "$WORKSPACE/kubeconfig"
+
+        kubectl --kubeconfig "$WORKSPACE/kubeconfig" get nodes
+      '''
+    }
   }
 }
 
