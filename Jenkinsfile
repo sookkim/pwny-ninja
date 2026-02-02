@@ -34,6 +34,20 @@ pipeline {
       }
     }
 
+    stage('Debug kubectl context') {
+  steps {
+    sh '''
+      set -eux
+      whoami
+      echo "HOME=$HOME"
+      which kubectl || true
+      kubectl version --client=true || true
+      kubectl config current-context || true
+      kubectl config view || true
+    '''
+  }
+}
+
     stage('Deploy (kubectl apply)') {
       steps {
         sh """
