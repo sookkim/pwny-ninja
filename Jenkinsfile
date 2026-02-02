@@ -35,22 +35,19 @@ pipeline {
     }
 
     stage('EKS Auth (kubeconfig)') {
-  steps {
-    withAWS(credentials: 'sookyung-aws', region: 'ap-northeast-2') {
-      sh '''
-        set -eux
-        aws sts get-caller-identity
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'sookyung-aws', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh '''
+            set -eux
+            export AWS_DEFAULT_REGION=ap-northeast-2
 
-        aws eks update-kubeconfig \
-          --region ap-northeast-2 \
-          --name pwny-ninja \
-          --kubeconfig "$WORKSPACE/kubeconfig"
-
-        kubectl --kubeconfig "$WORKSPACE/kubeconfig" get nodes
-      '''
+            aws sts get-caller-identity
+            aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" get nodes
+          '''
+        }
+      }
     }
-  }
-}
 
     stage('Debug kubectl context') {
   steps {
