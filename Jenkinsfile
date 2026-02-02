@@ -4,7 +4,7 @@ pipeline {
   environment {
     DOCKERHUB_USER = "mikion279"
     IMAGE_NAME = "${DOCKERHUB_USER}/pwny-ninja"
-    K8S_NAMESPACE = "dev"
+    K8S_NAMESPACE = "application"
   }
 
   stages {
