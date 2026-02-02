@@ -67,7 +67,7 @@ pipeline {
         }
       }
     }
->>>>>>> parent of ca6b919 (Update Jenkinsfile)
+
 
     stage('Debug kubectl context') {
   steps {
