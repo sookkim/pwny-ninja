@@ -62,7 +62,7 @@ pipeline {
     stage('Deploy (kubectl apply)') {
       steps {
         sh """
-          kubectl create namespace ${K8S_NAMESPACE} || true --kubeconfig "$WORKSPACE/kubeconfig"
+          kubectl --kubeconfig "$WORKSPACE/kubeconfig" create namespace ${K8S_NAMESPACE} || true 
 
           mkdir -p /tmp/pwny-ninja
           cp -r k8s/* /tmp/pwny-ninja/
@@ -70,8 +70,8 @@ pipeline {
           sed -i.bak "s|DOCKERHUB_USER/pwny-ninja:REPLACE_TAG|${IMAGE_NAME}:${GIT_SHA}|g" /tmp/pwny-ninja/deployment.yaml
           sed -i.bak "s|value: \\"REPLACE_SHA\\"|value: \\"${GIT_SHA}\\"|g" /tmp/pwny-ninja/deployment.yaml
 
-          kubectl -n ${K8S_NAMESPACE} apply -f /tmp/pwny-ninja/ --kubeconfig "$WORKSPACE/kubeconfig"
-          kubectl -n ${K8S_NAMESPACE} rollout status deploy/pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
+          kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n ${K8S_NAMESPACE} apply -f /tmp/pwny-ninja/
+          kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n ${K8S_NAMESPACE} rollout status deploy/pwny-ninja
         """
       }
     }
