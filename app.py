@@ -19,6 +19,9 @@ HTML = """
 <body>
   <div class="card">
     <h1>PWNY Ninja</h1>
+    <img src="/static/pwny-kr.webp"
+     alt="PWNY Ninja"
+     style="width:240px;margin:16px auto;display:block;">
     <p>Silent deploys. Sharp visibility.</p>
     <div class="badge">git: {{ git_sha }}</div>
   </div>
