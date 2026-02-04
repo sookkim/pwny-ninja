@@ -81,11 +81,18 @@ pipeline {
             set -eux
             export AWS_DEFAULT_REGION=ap-northeast-2
 
-            # (권장) deploy 직전에 kubeconfig 갱신도 한 번 더 해주면 더 안정적
+            # kubeconfig 보장
             aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
 
-            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f /tmp/pwny-ninja/deployment.yaml
-            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f /tmp/pwny-ninja/service.yaml
+            # 리소스는 일단 apply (deployment/service 생성/유지 목적)
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f k8s/service.yaml
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f k8s/deployment.yaml
+
+            # 여기서 이미지 태그를 커밋 SHA로 강제 변경 → 무조건 새 롤아웃 발생
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application set image deploy/pwny-ninja \
+              pwny-ninja=mikion279/pwny-ninja:${GIT_SHA}
+
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application rollout status deploy/pwny-ninja
           '''
         }
       }
