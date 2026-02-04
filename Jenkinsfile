@@ -71,18 +71,23 @@ pipeline {
 
     stage('Deploy (kubectl apply)') {
       steps {
-        sh """
-          kubectl --kubeconfig "$WORKSPACE/kubeconfig" create namespace ${K8S_NAMESPACE} || true 
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'sookyung-aws',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh '''
+            set -eux
+            export AWS_DEFAULT_REGION=ap-northeast-2
 
-          mkdir -p /tmp/pwny-ninja
-          cp -r k8s/* /tmp/pwny-ninja/
+            # (권장) deploy 직전에 kubeconfig 갱신도 한 번 더 해주면 더 안정적
+            aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
 
-          sed -i.bak "s|DOCKERHUB_USER/pwny-ninja:REPLACE_TAG|${IMAGE_NAME}:${GIT_SHA}|g" /tmp/pwny-ninja/deployment.yaml
-          sed -i.bak "s|value: \\"REPLACE_SHA\\"|value: \\"${GIT_SHA}\\"|g" /tmp/pwny-ninja/deployment.yaml
-
-          kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n ${K8S_NAMESPACE} apply -f /tmp/pwny-ninja/
-          kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n ${K8S_NAMESPACE} rollout status deploy/pwny-ninja
-        """
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f /tmp/pwny-ninja/
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application rollout status deploy/pwny-ninja
+          '''
+        }
       }
     }
   }
