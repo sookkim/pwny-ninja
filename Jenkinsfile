@@ -84,8 +84,8 @@ pipeline {
             # (권장) deploy 직전에 kubeconfig 갱신도 한 번 더 해주면 더 안정적
             aws eks update-kubeconfig --region ap-northeast-2 --name pwny-ninja --kubeconfig "$WORKSPACE/kubeconfig"
 
-            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f /tmp/pwny-ninja/
-            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application rollout status deploy/pwny-ninja
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application apply -f /tmp/pwny-ninja/k8s/
+            kubectl --kubeconfig "$WORKSPACE/kubeconfig" -n application rollout status deploy/pwny-ninja/k8s
           '''
         }
       }
